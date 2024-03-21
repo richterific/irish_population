@@ -1,0 +1,113 @@
+## Load libraries ----
+pacman::p_load(dplyr, tidyverse, stringr, janitor, readr, DT, rio, BiocManager, skimr, forcats, tmap,tidycensus, kableExtra, here, flextable, scales, readxl, lessR, xtable,shiny,sf,leaflet,maps,mapproj)
+## Get Data  ----
+irish_2022 <- get_acs(
+  geography = "county",
+  # table = "B04006",
+  variables = c("B04006_001E","B04006_049E"),
+  year = 2022,
+  state = "Pennsylvania",
+  output = "tidy",
+  survey = "acs5",
+  geometry = TRUE
+) %>%
+  clean_names() %>%
+  pivot_wider(names_from = "variable",values_from = c("estimate","moe")) %>%
+  dplyr::rename(total_pop_2022 = estimate_B04006_001) %>%
+  dplyr::rename(irish_pop_2022 = estimate_B04006_049) %>%
+  glimpse()
+irish_2017 <- get_acs(
+  geography = "county",
+  # table = "B04006",
+  variables = c("B04006_001E","B04006_049E"),
+  year = 2017,
+  state = "Pennsylvania",
+  output = "tidy",
+  survey = "acs5",
+  geometry = TRUE
+) %>%
+  clean_names() %>%
+  pivot_wider(names_from = "variable",values_from = c("estimate","moe")) %>%
+  dplyr::rename(total_pop_2017 = estimate_B04006_001) %>%
+  dplyr::rename(irish_pop_2017 = estimate_B04006_049) %>%
+  glimpse()
+irish_2012 <- get_acs(
+  geography = "county",
+  # table = "B04006",
+  variables = c("B04006_001E","B04006_049E"),
+  year = 2012,
+  state = "Pennsylvania",
+  output = "tidy",
+  survey = "acs5",
+  geometry = TRUE
+) %>%
+  clean_names() %>%
+  pivot_wider(names_from = "variable",values_from = c("estimate","moe")) %>%
+  dplyr::rename(total_pop_2012 = estimate_B04006_001) %>%
+  dplyr::rename(irish_pop_2012 = estimate_B04006_049) %>%
+  glimpse()
+irish_pa <- merge(irish_2012,irish_2017, by.x=c("geoid","name"), by.y=c("geoid","name")) %>%
+  merge(irish_2022, by.x=c("geoid","name"), by.y=c("geoid","name")) %>%
+  select(geoid,name,total_pop_2012,irish_pop_2012,total_pop_2017,irish_pop_2017, total_pop_2022,irish_pop_2022) %>%
+  mutate(ten_year_pop_chg = round(((total_pop_2022 - total_pop_2012)/total_pop_2012)*100, digits = 2),
+         ten_year_irish_chg = round(((irish_pop_2022 - irish_pop_2012)/irish_pop_2012)*100, digits = 2),
+         five_year_irish_chg = round(((irish_pop_2022 - irish_pop_2017)/irish_pop_2017)*100, digits = 2),
+         irish_pop_pct_2022 = round((irish_pop_2022/total_pop_2022)*100, digits= 2),
+         irish_pop_pct_2012 = round((irish_pop_2012/total_pop_2012)*100, digits= 2)
+  )
+## get acs without geo ----
+irish_2022_n <- get_acs(
+  geography = "county",
+  # table = "B04006",
+  variables = c("B04006_001E","B04006_049E"),
+  year = 2022,
+  state = "Pennsylvania",
+  output = "tidy",
+  survey = "acs5",
+  geometry = FALSE
+) %>%
+  clean_names() %>%
+  pivot_wider(names_from = "variable",values_from = c("estimate","moe")) %>%
+  dplyr::rename(total_pop_2022 = estimate_B04006_001) %>%
+  dplyr::rename(irish_pop_2022 = estimate_B04006_049) %>%
+  glimpse()
+irish_2017_n <- get_acs(
+  geography = "county",
+  # table = "B04006",
+  variables = c("B04006_001E","B04006_049E"),
+  year = 2017,
+  state = "Pennsylvania",
+  output = "tidy",
+  survey = "acs5",
+  geometry = FALSE
+) %>%
+  clean_names() %>%
+  pivot_wider(names_from = "variable",values_from = c("estimate","moe")) %>%
+  dplyr::rename(total_pop_2017 = estimate_B04006_001) %>%
+  dplyr::rename(irish_pop_2017 = estimate_B04006_049) %>%
+  glimpse()
+irish_2012_n <- get_acs(
+  geography = "county",
+  # table = "B04006",
+  variables = c("B04006_001E","B04006_049E"),
+  year = 2012,
+  state = "Pennsylvania",
+  output = "tidy",
+  survey = "acs5",
+  geometry = FALSE
+) %>%
+  clean_names() %>%
+  pivot_wider(names_from = "variable",values_from = c("estimate","moe")) %>%
+  dplyr::rename(total_pop_2012 = estimate_B04006_001) %>%
+  dplyr::rename(irish_pop_2012 = estimate_B04006_049) %>%
+  glimpse()
+irish_pa_n <- merge(irish_2012_n,irish_2017_n, by.x=c("geoid","name"), by.y=c("geoid","name")) %>%
+  merge(irish_2022_n, by.x=c("geoid","name"), by.y=c("geoid","name")) %>%
+  select(geoid,name,total_pop_2012,irish_pop_2012,total_pop_2017,irish_pop_2017, total_pop_2022,irish_pop_2022) %>%
+  mutate(ten_year_pop_chg = round(((total_pop_2022 - total_pop_2012)/total_pop_2012)*100, digits = 2),
+         ten_year_irish_chg = round(((irish_pop_2022 - irish_pop_2012)/irish_pop_2012)*100, digits = 2),
+         five_year_irish_chg = round(((irish_pop_2022 - irish_pop_2017)/irish_pop_2017)*100, digits = 2),
+         irish_pop_pct_2022 = round((irish_pop_2022/total_pop_2022)*100, digits= 2),
+         irish_pop_pct_2012 = round((irish_pop_2012/total_pop_2012)*100, digits= 2)
+  )
+
